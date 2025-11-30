@@ -98,7 +98,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     private Image pacmanRightImage;
 
     // Mapa do jogo representado como um array de strings
-    private String[] tileMap = {
+    private String[] GameTileMap = {
         "XXXXXXXXXXXXXXXXXXX",
         "X        X        X",
         "X XX XXX X XXX XX X",
@@ -187,7 +187,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
 
         for (int r = 0; r < rowCount; r++) {
             for (int c = 0; c < columnCount; c++) {
-                String row = tileMap[r];
+                String row = GameTileMap[r];
                 char tileMapChar = row.charAt(c);
 
                 int x = c*tileSize;
