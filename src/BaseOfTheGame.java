@@ -2,7 +2,6 @@ import javax.swing.JFrame;
 
 
 // Nossa classe principal que inicia o jogo Pacman, criando a janela do jogo e adicionando o painel do jogo
-
 public class BaseOfTheGame {
     public static void main(String[] args) {
         JFrame frame = new JFrame("Pacman");

@@ -44,7 +44,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             this.x += this.velocityX;
             this.y += this.velocityY;
             for (Block wall : walls) {
-                if (collision(this, wall)) {
+                if (collisionVerify(this, wall)) {
                     this.x -= this.velocityX;
                     this.y -= this.velocityY;
                     this.direction = prevDirection;
@@ -78,7 +78,6 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         }
     }
 
-    // Variáveis de configuração do jogo
     private int rowCount = 21;
     private int columnCount = 19;
     private int tileSize = 32;
@@ -97,7 +96,6 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     private Image pacmanLeftImage;
     private Image pacmanRightImage;
 
-    // Mapa do jogo representado como um array de strings
     private String[] GameTileMap = {
         "XXXXXXXXXXXXXXXXXXX",
         "X        X        X",
@@ -179,7 +177,6 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     }
 
 
-    // Carrega o mapa do jogo a partir do array de strings, criando os blocos correspondentes, como paredes, fantasmas, O Pacman e comidas
     public void loadMap() {
         walls = new HashSet<Block>();
         foods = new HashSet<Block>();
@@ -225,14 +222,13 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     }
 
 
-    // Método para desenhar os elementos do jogo na tela, estamos utilizando Graphics para o desenho dos elementos, o graphics nada mais é que uma ferramenta de desenho do java
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         draw(g);
     }
 
 
-    // Desenhando os elementos do jogo na tela
+
     public void draw(Graphics g) {
         g.drawImage(pacman.image, pacman.x, pacman.y, pacman.width, pacman.height, null);
 
@@ -258,13 +254,13 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         }
     }
 
-    // Lógica de movimentação do Pacman e dos fantasmas, detecção de colisões, pontuação e reinício do jogO
-    public void move() {
+
+    public void moveLogic() {
         pacman.x += pacman.velocityX;
         pacman.y += pacman.velocityY;
 
         for (Block wall : walls) {
-            if (collision(pacman, wall)) {
+            if (collisionVerify(pacman, wall)) {
                 pacman.x -= pacman.velocityX;
                 pacman.y -= pacman.velocityY;
                 break;
@@ -272,7 +268,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         }
 
         for (Block ghost : ghosts) {
-            if (collision(ghost, pacman)) {
+            if (collisionVerify(ghost, pacman)) {
                 soundManager.playSound("src/sounds/death.wav");
                 lives -= 1;
                 if (lives == 0) {
@@ -281,7 +277,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
                     soundManager.playSound("src/sounds/gameover.wav");
                     return;
                 }
-                resetPositions();
+                resetPositionsAndRestart();
             }
 
             if (ghost.y == tileSize*9 && ghost.direction != 'U' && ghost.direction != 'D') {
@@ -290,7 +286,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
             ghost.x += ghost.velocityX;
             ghost.y += ghost.velocityY;
             for (Block wall : walls) {
-                if (collision(ghost, wall) || ghost.x <= 0 || ghost.x + ghost.width >= boardWidth) {
+                if (collisionVerify(ghost, wall) || ghost.x <= 0 || ghost.x + ghost.width >= boardWidth) {
                     ghost.x -= ghost.velocityX;
                     ghost.y -= ghost.velocityY;
                     char newDirection = directions[random.nextInt(4)];
@@ -301,7 +297,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
 
         Block foodEaten = null;
         for (Block food : foods) {
-            if (collision(pacman, food)) {
+            if (collisionVerify(pacman, food)) {
                 foodEaten = food;
                 score += 10;
                 long currentTime = System.currentTimeMillis();
@@ -315,20 +311,18 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
 
         if (foods.isEmpty()) {
             loadMap();
-            resetPositions();
+            resetPositionsAndRestart();
         }
     }
 
-    // Verifica colisão entre dois blocos
-    public boolean collision(Block a, Block b) {
+    public boolean collisionVerify(Block a, Block b) {
         return  a.x < b.x + b.width &&
                 a.x + a.width > b.x &&
                 a.y < b.y + b.height &&
                 a.y + a.height > b.y;
     }
 
-    // Reinicia as posições do Pacman e dos fantasmas depois de perder uma vida ou reiniciar o jogo
-    public void resetPositions() {
+    public void resetPositionsAndRestart() {
         pacman.reset();
         pacman.velocityX = 0;
         pacman.velocityY = 0;
@@ -339,21 +333,21 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
         }
     }
 
-    // Método chamado a cada intervalo do timer para atualizar o estado do jogo
+
     @Override
     public void actionPerformed(ActionEvent e) {
-        move();
+        moveLogic();
         repaint();
         if (gameOver) {
             gameLoop.stop();
         }
     }
 
-    // Inútil, só para cumprir a interface do KeyListener
+
     @Override
     public void keyTyped(KeyEvent e) {}
 
-    // Mesma coisa do acima
+
     @Override
     public void keyPressed(KeyEvent e) {}
 
@@ -363,7 +357,7 @@ public class PacMan extends JPanel implements ActionListener, KeyListener {
     public void keyReleased(KeyEvent e) {
         if (gameOver) {
             loadMap();
-            resetPositions();
+            resetPositionsAndRestart();
             lives = 3;
             score = 0;
             gameOver = false;
